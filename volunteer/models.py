@@ -114,3 +114,35 @@ class EventParticipation(models.Model):
         return f"{self.user.username} - {self.event.name}"
 
 
+class ReportImage(models.Model):
+    """Model for storing multiple images for an event report"""
+    report = models.ForeignKey('EventReport', on_delete=models.CASCADE, related_name='report_images')
+    image = models.ImageField(upload_to='event_reports/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image for {self.report.event.name}"
+
+
+class EventReport(models.Model):
+    """Model for event reports after completion"""
+    event = models.OneToOneField(
+        Event, 
+        on_delete=models.CASCADE, 
+        related_name='report'
+    )
+    title = models.CharField(max_length=200, verbose_name="Tiêu đề báo cáo")
+    actual_participants = models.PositiveIntegerField(verbose_name="Số người tham gia thực tế")
+    report_content = models.TextField(verbose_name="Nội dung báo cáo")
+    achievements = models.TextField(verbose_name="Kết quả đạt được")
+    challenges = models.TextField(verbose_name="Thách thức gặp phải")
+    images = models.ImageField(upload_to='event_reports/', null=True, blank=True, verbose_name="Hình ảnh báo cáo")
+    report_date = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.CASCADE, 
+        related_name='created_reports'
+    )
+    
+    def __str__(self):
+        return f"Report for {self.event.name}" 

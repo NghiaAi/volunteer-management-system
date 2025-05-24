@@ -1,0 +1,118 @@
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .form-label {
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-weight: 500;
+  }
+
+  .form-control {
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .form-control:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+  }
+
+  textarea.form-control {
+    min-height: 150px;
+    resize: vertical;
+  }
+
+  .card {
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .card-header {
+    border-bottom: none;
+  }
+
+  .btn {
+    border-radius: 0.5rem;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+  }
+
+  .btn-warning:hover {
+    background-color: #ffca2c;
+    border-color: #ffc720;
+    color: #000;
+  }
+
+  .btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+  }
+
+  .invalid-feedback {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .text-muted {
+    font-size: 0.875rem;
+  }
+
+  /* Đảm bảo các input và label luôn xếp dọc */
+  .form-group label,
+  .form-group input,
+  .form-group textarea {
+    display: block;
+    width: 100%;
+  }
+
+  /* Thêm khoảng cách giữa các trường */
+  .form-group + .form-group {
+    margin-top: 1.5rem;
+  }
+
+  /* Style cho formset */
+  .image-form {
+    position: relative;
+  }
+
+  .image-form .form-control {
+    margin-bottom: 0.5rem;
+  }
+
+  .main-report-img {
+    max-width: 100%;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+  .report-content-block {
+    font-size: 1.08rem;
+    line-height: 1.7;
+    padding: 1.2rem 1.5rem;
+    background: #f8f9fa;
+    border-radius: 1rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  }
+  .card {
+    border-radius: 1.5rem;
+  }
+  .btn-danger {
+    font-weight: 500;
+  }

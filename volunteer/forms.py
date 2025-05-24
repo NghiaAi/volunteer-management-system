@@ -108,3 +108,68 @@ class EventForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 5}),
         }
 
+class ReportImageForm(forms.ModelForm):
+    """Form for uploading report images"""
+    class Meta:
+        model = ReportImage
+        fields = ['image']
+        widgets = {
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Làm cho trường image và id không bắt buộc
+        self.fields['image'].required = False
+        if 'id' in self.fields:
+            self.fields['id'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Nếu DELETE được đánh dấu, bỏ qua yêu cầu tất cả các trường
+        if cleaned_data.get('DELETE', False):
+            self.errors.clear()
+        return cleaned_data
+
+# Create a formset for ReportImage
+ReportImageFormSet = inlineformset_factory(
+    EventReport,
+    ReportImage,
+    form=ReportImageForm,
+    extra=3,  # Number of empty forms to display
+    can_delete=True,
+    max_num=10  # Maximum number of images allowed
+)
+
+class EventReportForm(forms.ModelForm):
+    """Form for creating event reports"""
+    
+    class Meta:
+        model = EventReport
+        fields = ['title', 'actual_participants', 'report_content', 'achievements', 'challenges']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'actual_participants': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+            'report_content': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'achievements': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'challenges': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+class EventSearchForm(forms.Form):
+    """Form for searching and filtering events"""
+    query = forms.CharField(
+        label='Tìm kiếm',
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Tìm kiếm sự kiện, địa điểm...'}))
+    
+    CATEGORY_CHOICES = [('', 'Tất cả loại sự kiện')] + list(Event.EventCategory.choices)
+    category = forms.ChoiceField(
+        label='Loại sự kiện',
+        choices=CATEGORY_CHOICES,
+        required=False)
+    
+    STATUS_CHOICES = [('', 'Tất cả trạng thái')] + list(Event.EventStatus.choices)
+    status = forms.ChoiceField(
+        label='Trạng thái',
+        choices=STATUS_CHOICES,
+        required=False)

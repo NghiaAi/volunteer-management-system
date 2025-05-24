@@ -1,0 +1,129 @@
+{% extends 'volunteer/base.html' %}
+{% load static %}
+{% block title %}[Báo Cáo]: {{ report.title }} | Hội Tình Nguyện IUH{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="card shadow-sm border-0 p-4">
+        <div class="card-body">
+          {% if not event_ended %}
+            <!-- Sự kiện chưa kết thúc -->
+            <div class="alert alert-warning text-center" role="alert">
+              Sự kiện này chưa có báo cáo vì chưa kết thúc.
+            </div>
+          {% else %}
+            <!-- Sự kiện đã kết thúc -->
+            <h2 class="fw-bold text-center mb-4" style="font-size: 2.2rem">
+              [Báo Cáo]: {% if report_exists %}{{ report.title }}{% else %}Chưa có báo cáo{% endif %}
+            </h2>
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div>
+                  <b><i class="bi bi-calendar-event"></i> Ngày tổ chức:</b> {{ event.start_time|date:'d/m/Y' }}
+                </div>
+                <div>
+                  <b><i class="bi bi-calendar-check"></i> Ngày kết thúc:</b> {{ event.end_time|date:'d/m/Y' }}
+                </div>
+                <div>
+                  <b><i class="bi bi-clipboard-check"></i> Trạng thái:</b> {{ event.get_status_display }}
+                </div>
+                <div>
+                  <b><i class="bi bi-geo-alt"></i> Địa điểm:</b> {{ event.location }}
+                </div>
+                <div>
+                  <b><i class="bi bi-tag"></i> Loại sự kiện:</b> {{ event.get_category_display }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div>
+                  <b><i class="bi bi-clock"></i> Số giờ tình nguyện:</b> {{ event.volunteer_hours|default:'-' }} giờ
+                </div>
+                <div>
+                  <b><i class="bi bi-calendar3"></i> Ngày tạo báo cáo:</b> {% if report_exists %}{{ report.report_date|date:'d/m/Y' }}{% else %}Chưa có{% endif %}
+                </div>
+                <div>
+                  <b><i class="bi bi-people"></i> Số người tham gia thực tế:</b>
+                  {% if report_exists %}{{ report.actual_participants }}{% if event.max_participants %} / {{ event.max_participants }}{% endif %}{% else %}Chưa có{% endif %}
+                </div>
+                <div>
+                  <b><i class="bi bi-person-badge"></i> Người quản lý hoạt động:</b>
+                  {{ event.organizer.get_full_name|default:event.organizer.username }}
+                </div>
+                <div>
+                  <b><i class="bi bi-telephone"></i> Liên hệ:</b> {{ event.contact_info|default:'-' }}
+                </div>
+              </div>
+            </div>
+            <hr />
+            {% if report_exists %}
+              <!-- Báo cáo đã tồn tại -->
+              <h3 class="fw-bold mb-3">Nội dung báo cáo</h3>
+              <div class="mb-3 report-content-block">
+                {{ report.report_content|linebreaks }}
+              </div>
+              <h3 class="fw-bold mb-3">Kết quả đạt được</h3>
+              <div class="mb-3 report-content-block">
+                {{ report.achievements|linebreaks }}
+              </div>
+              <h3 class="fw-bold mb-3">Thách thức gặp phải</h3>
+              <div class="mb-3 report-content-block">
+                {{ report.challenges|linebreaks }}
+              </div>
+              {% if report.report_images.exists %}
+                <div class="mb-3">
+                  <h3 class="fw-bold mb-3">Hình ảnh báo cáo</h3>
+                  <div class="row mt-2">
+                    {% for image in report.report_images.all %}
+                      <div class="col-md-4 mb-3">
+                        <img
+                          src="{{ image.image.url }}"
+                          alt="Hình ảnh báo cáo"
+                          class="img-fluid rounded"
+                          style="height: 180px; object-fit: cover"
+                        />
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            {% else %}
+              <!-- Sự kiện đã kết thúc nhưng chưa có báo cáo -->
+              <div class="alert alert-info text-center" role="alert">
+                Sự kiện <b>{{ event.name }}</b> đã kết thúc nhưng chưa có báo cáo.
+              </div>
+              {% if can_modify_report %}
+                <div class="mb-3 text-center">
+                  <a href="{% url 'create_report' event.pk %}" class="btn btn-gold text-white w-100 py-2">
+                    Tạo báo cáo
+                  </a>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white fw-bold">Thao tác</div>
+        <div class="card-body d-flex flex-row gap-2 justify-content-start align-items-center">
+          <a href="{% url 'dashboard' %}" class="btn btn-light border">
+            <i class="bi bi-arrow-left"></i> Trở về
+          </a>
+          {% if can_modify_report and event_ended %}
+            <a href="{% url 'update_report' event.pk %}" class="btn btn-danger">
+              <i class="bi bi-pencil-square"></i> Chỉnh sửa
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteer/css/event_report.css' %}" />
+
+{% endblock %}

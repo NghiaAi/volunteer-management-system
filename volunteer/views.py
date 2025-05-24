@@ -152,7 +152,6 @@ def share_event(request, pk):
         'shares': event.shares
     })
 
-
 class SignUpView(CreateView):
     """View for user registration"""
     form_class = CustomUserCreationForm
@@ -202,7 +201,120 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         messages.error(self.request, "Có lỗi xảy ra. Vui lòng kiểm tra lại thông tin.")
         return super().form_invalid(form)
 
+class EventCreateView(LoginRequiredMixin, CreateView):
+    """View for creating new events"""
+    model = Event
+    form_class = EventForm
+    template_name = 'volunteer/event_form.html'
+    
+    def form_valid(self, form):
+        form.instance.organizer = self.request.user
+        messages.success(self.request, "Tạo sự kiện mới thành công!")
+        return super().form_valid(form)
 
+
+
+@login_required
+def create_event_report(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    if request.user != event.organizer and not request.user.is_admin:
+        messages.error(request, "Bạn không có quyền tạo báo cáo cho sự kiện này.")
+        return redirect('event_detail', pk=pk)
+    if event.status != 'COM':
+        messages.error(request, "Sự kiện chưa kết thúc, không thể tạo báo cáo.")
+        return redirect('event_detail', pk=pk)
+    try:
+        event.report
+        messages.info(request, "Sự kiện này đã có báo cáo.")
+        return redirect('event_detail', pk=pk)
+    except EventReport.DoesNotExist:
+        pass
+
+    if request.method == 'POST':
+        form = EventReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.event = event
+            report.created_by = request.user
+            report.save()
+            # Xử lý upload nhiều ảnh
+            images = request.FILES.getlist('images')
+            if len(images) > 10:
+                messages.error(request, "Bạn chỉ có thể upload tối đa 10 hình ảnh.")
+                return render(request, 'volunteer/report_form.html', {
+                    'form': form,
+                    'event': event
+                })
+            for image in images:
+                ReportImage.objects.create(report=report, image=image)
+            # Cập nhật số giờ tình nguyện cho người tham gia
+            participations = EventParticipation.objects.filter(event=event, attended=True)
+            for participation in participations:
+                user = participation.user
+                user.volunteer_hours += event.volunteer_hours
+                user.save()
+            messages.success(request, "Tạo báo cáo sự kiện thành công!")
+            return redirect('event_detail', pk=pk)
+    else:
+        form = EventReportForm()
+    
+    return render(request, 'volunteer/report_form.html', {
+        'form': form,
+        'event': event
+    })
+
+@login_required
+def update_event_report(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    if request.user != event.organizer and not request.user.is_admin:
+        messages.error(request, "Bạn không có quyền chỉnh sửa báo cáo cho sự kiện này.")
+        return redirect('event_detail', pk=pk)
+    try:
+        report = event.report
+    except EventReport.DoesNotExist:
+        messages.error(request, "Sự kiện này chưa có báo cáo để chỉnh sửa.")
+        return redirect('event_detail', pk=pk)
+
+    if request.method == 'POST':
+        form = EventReportForm(request.POST, instance=report)
+        image_formset = ReportImageFormSet(request.POST, request.FILES, instance=report)
+        if form.is_valid():
+            form.save()
+            # Xử lý xóa ảnh hiện có
+            if image_formset.is_valid():
+                image_formset.save()
+            else:
+                messages.error(request, "Có lỗi khi xử lý hình ảnh. Vui lòng kiểm tra lại.")
+                return render(request, 'volunteer/report_form.html', {
+                    'form': form,
+                    'image_formset': image_formset,
+                    'event': event
+                })
+            # Xử lý upload ảnh mới
+            images = request.FILES.getlist('images')
+            total_images = report.report_images.count() + len(images)
+            if total_images > 10:
+                messages.error(request, "Tổng số hình ảnh không được vượt quá 10.")
+                return render(request, 'volunteer/report_form.html', {
+                    'form': form,
+                    'image_formset': image_formset,
+                    'event': event
+                })
+            for image in images:
+                ReportImage.objects.create(report=report, image=image)
+            messages.success(request, "Chỉnh sửa báo cáo sự kiện thành công!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Có lỗi trong biểu mẫu. Vui lòng kiểm tra lại.")
+    else:
+        form = EventReportForm(instance=report)
+        image_formset = ReportImageFormSet(instance=report)
+
+    return render(request, 'volunteer/report_form.html', {
+        'form': form,
+        'image_formset': image_formset,
+        'event': event
+    })
 class DashboardView(ListView):
     """Dashboard view for users to see their events or all events if not logged in"""
     model = Event
@@ -260,4 +372,44 @@ def donate(request):
 def custom_logout(request):
     logout(request)
     return redirect('home')
+
+class EventReportView(UserPassesTestMixin, DetailView):
+    model = EventReport
+    template_name = 'volunteer/event_report.html'
+    context_object_name = 'report'
+
+    def test_func(self):
+        event = get_object_or_404(Event, pk=self.kwargs['pk'])
+        return (
+            self.request.user.is_superuser or
+            self.request.user == event.organizer
+        )
+
+    def get_object(self):
+        event_id = self.kwargs['pk']
+        event = get_object_or_404(Event, pk=event_id)
+        try:
+            return EventReport.objects.get(event=event)
+        except EventReport.DoesNotExist:
+            return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        event = Event.objects.get(pk=self.kwargs['pk'])
+        context['event'] = event
+        context['event_ended'] = (event.status == 'COM')
+        context['can_modify_report'] = (
+            self.request.user.has_perm('volunteer.change_eventreport') or
+            self.request.user == event.organizer
+        )
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        if self.object is None:
+            context['report_exists'] = False
+        else:
+            context['report_exists'] = True
+        return self.render_to_response(context)
 
