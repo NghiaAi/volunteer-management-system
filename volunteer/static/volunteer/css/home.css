@@ -1,0 +1,15 @@
+/* Tăng kích thước ảnh trong phần Về Chúng Tôi */
+.about-image {
+  width: 100%;
+  max-width: 600px;
+  height: 320px;
+  object-fit: cover;
+}
+
+@media (max-width: 767px) {
+  .about-image {
+    max-width: 100%;
+    height: 200px;
+    margin-bottom: 20px;
+  }
+}

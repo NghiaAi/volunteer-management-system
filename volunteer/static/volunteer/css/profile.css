@@ -1,0 +1,111 @@
+/* Tùy chỉnh giao diện trang hồ sơ */
+.container {
+  max-width: 1200px; /* Đảm bảo container đủ rộng */
+}
+
+/* Đảm bảo background phía sau không trùng với card-header */
+body, .container {
+  background-color: #f8f9fa; /* Màu nền sáng để tương phản với card-header */
+}
+
+/* Tùy chỉnh card */
+.card {
+  border-radius: 10px; /* Bo góc card */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Thêm bóng nhẹ */
+}
+
+/* Tùy chỉnh card-header */
+.card-header {
+  background-color: #23263a; /* Định nghĩa bg-navy */
+  color: #d4af37; /* Định nghĩa text-gold */
+  font-weight: bold; /* Chữ đậm */
+  font-size: 1rem; /* Tăng kích thước chữ tiêu đề */
+  padding: 0.75rem 1.25rem; /* Điều chỉnh padding */
+  border-bottom: 2px solid #d4af37; /* Viền dưới màu vàng để nổi bật */
+}
+
+/* Tùy chỉnh card-body */
+.card-body {
+  padding: 1.5rem; /* Tăng padding để nội dung thoáng hơn */
+}
+
+/* Tùy chỉnh danh sách sự kiện */
+.list-group-item {
+  border: none; /* Xóa viền của list-group-item */
+  padding: 1rem 1.25rem; /* Tăng padding cho nội dung */
+  font-size: 1.05rem; /* Tăng kích thước chữ */
+}
+
+.list-group-item a {
+  color: #23263a; /* Màu liên kết đồng bộ với bg-navy */
+  text-decoration: none; /* Xóa gạch chân */
+  font-weight: 500; /* Chữ hơi đậm */
+}
+
+.list-group-item a:hover {
+  color: #d4af37; /* Màu vàng khi hover */
+  text-decoration: underline; /* Gạch chân khi hover */
+}
+
+/* Tùy chỉnh badge */
+.badge {
+  font-size: 0.85rem; /* Kích thước chữ badge */
+  padding: 0.35rem 0.75rem; /* Tăng padding cho badge */
+  margin-top:10px;
+  border-radius: 12px; /* Bo góc badge */
+}
+
+/* Tùy chỉnh nút "Cập nhật hồ sơ" */
+.btn-outline-gold {
+  color: #d4af37; /* Màu vàng */
+  border-color: #d4af37; /* Viền vàng */
+  border-radius: 25px; /* Bo góc nút */
+  font-weight: bold; /* Chữ đậm */
+  padding: 0.5rem 1.5rem; /* Tăng padding */
+  transition: background 0.2s, color 0.2s; /* Hiệu ứng mượt khi hover */
+}
+
+.btn-outline-gold:hover {
+  background: #d4af37; /* Màu vàng khi hover */
+  color: #fff; /* Chữ trắng khi hover */
+}
+
+/* Tùy chỉnh text-gold */
+.text-gold {
+  color: #ffffff; /* Màu vàng */
+}
+
+footer.bg-navy {
+  background: #23263a !important;
+  color: #fff;
+}
+
+footer.bg-navy .container {
+  background: transparent !important;
+}
+
+footer.bg-navy,
+footer.bg-navy * {
+  color: #fff !important;
+}
+
+
+/* Responsive: Điều chỉnh trên thiết bị di động */
+@media (max-width: 767px) {
+  .card-header {
+    font-size: 1.1rem; /* Giảm kích thước chữ trên thiết bị di động */
+  }
+
+  .card-body {
+    padding: 1rem; /* Giảm padding trên thiết bị di động */
+  }
+
+  .list-group-item {
+    padding: 0.75rem 1rem; /* Giảm padding trên thiết bị di động */
+    font-size: 1rem; /* Giảm kích thước chữ */
+  }
+
+  .btn-outline-gold {
+    padding: 0.5rem 1rem; /* Giảm padding trên thiết bị di động */
+  }
+}

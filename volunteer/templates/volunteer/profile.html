@@ -1,0 +1,70 @@
+{% extends 'volunteer/base.html' %}
+{% load static %}
+{% block title %}Hồ sơ cá nhân | Hội Tình Nguyện IUH{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header bg-navy text-gold">Thông tin cá nhân</div>
+        <div class="card-body">
+          <div>
+            <b>Họ tên:</b> {% if profile_user.last_name or profile_user.first_name %}{{ profile_user.first_name }} {{ profile_user.last_name }}{% elif profile_user.username %}{{ profile_user.username }}{% else %}Người dùng{% endif %}
+          </div>
+          <div>
+            <b>Email:</b> {% if profile_user.email %}{{ profile_user.email }}{% else %}Chưa cập nhật{% endif %}
+          </div>
+          <div>
+            <b>Tuổi:</b> {% if profile_user.age %}{{ profile_user.age }}{% else %}Chưa cập nhật{% endif %}
+          </div>
+          <div>
+            <b>Số điện thoại:</b> {% if profile_user.phone_number %}{{ profile_user.phone_number }}{% else %}Chưa cập nhật{% endif %}
+          </div>
+          <div>
+            <b>Địa chỉ:</b> {% if profile_user.address %}{{ profile_user.address }}{% else %}Chưa cập nhật{% endif %}
+          </div>
+          <div>
+            <b>Kỹ năng:</b> {% if profile_user.skills %}{{ profile_user.skills }}{% else %}Chưa cập nhật{% endif %}
+          </div>
+          <div>
+            <b>Tổng giờ tình nguyện:</b> {% if profile_user.volunteer_hours %}{{ profile_user.volunteer_hours }}{% else %}Chưa cập nhật{% endif %}
+          </div>
+          <a href="{% url 'profile_update' %}" class="btn btn-outline-gold mt-3">Cập nhật hồ sơ</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header bg-navy text-gold">Sự kiện đã tham gia</div>
+        <ul class="list-group list-group-flush">
+          {% for event in participating_events %}
+          <li class="list-group-item">
+            <a href="{% url 'event_detail' event.pk %}">{{ event.name }}</a>
+            <span class="badge bg-secondary ms-2">{{ event.get_status_display }}</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted">Chưa tham gia sự kiện nào</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="card mb-4">
+        <div class="card-header bg-navy text-gold">Sự kiện đã tổ chức</div>
+        <ul class="list-group list-group-flush">
+          {% for event in organized_events %}
+          <li class="list-group-item">
+            <a href="{% url 'event_detail' event.pk %}">{{ event.name }}</a>
+            <span class="badge bg-secondary ms-2">{{ event.get_status_display }}</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted">Chưa tổ chức sự kiện nào</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteer/css/profile.css' %}">
+{% endblock %}

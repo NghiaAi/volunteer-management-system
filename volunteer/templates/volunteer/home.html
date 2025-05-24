@@ -1,0 +1,57 @@
+{% extends 'volunteer/base.html' %} {% load static %} {% block title %}Hội Tình
+Nguyện IUH{% endblock %} {% block content %}
+<!-- Banner -->
+<div
+  class="position-relative"
+  style="
+    height: 220px;
+    background: linear-gradient(rgba(35, 38, 58, 0.7), rgba(35, 38, 58, 0.7)),
+      url('/static/volunteer/banner.jpg') center/cover no-repeat;
+  "
+>
+  <div
+    class="d-flex flex-column justify-content-center align-items-center h-100 text-center text-white"
+  >
+    <h1 class="display-4 fw-bold" style="font-size: 2.3rem">
+      Hội Tình Nguyện IUH
+    </h1>
+    <p class="lead" style="font-size: 1.1rem">
+      Hãy cùng chúng tôi lan tỏa tình yêu và sự thay đổi tích cực đến mọi người.
+    </p>
+    
+  </div>
+</div>
+<!-- About Section -->
+<div class="container" id="about" style="margin-top: 32px; margin-bottom: 32px">
+  <div
+    class="row align-items-center"
+    style="padding-top: 12px; padding-bottom: 12px"
+  >
+    <div class="col-md-7">
+      <h2 class="section-title" style="font-size: 2rem; margin-bottom: 12px">
+        Về Chúng Tôi
+      </h2>
+      <p style="font-size: 1.08rem; margin-bottom: 10px">
+        Tình Nguyện IUH là một tổ chức phi lợi nhuận hoạt động tại trường Đại
+        học Công nghiệp TP.HCM (IUH). Chúng tôi tập hợp các sinh viên tình
+        nguyện với mục đích mang lại những thay đổi tích cực cho cộng đồng và xã
+        hội.
+      </p>
+      <p style="font-size: 1.08rem; margin-bottom: 0">
+        Với tinh thần "Hành động vì cộng đồng", chúng tôi tổ chức các hoạt động
+        như: hiến máu nhân đạo, bảo vệ môi trường, giúp đỡ người vô gia cư, và
+        nhiều hoạt động khác nhằm lan tỏa tình yêu thương và lòng nhân ái.
+      </p>
+    </div>
+    <div class="col-md-5 text-center">
+      <img
+        src="/static/volunteer/image/about1.jpg"
+        alt="Tình nguyện IUH"
+        class="img-fluid rounded shadow about-image"
+      />
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteer/css/home.css' %}" />
+{% endblock %} 

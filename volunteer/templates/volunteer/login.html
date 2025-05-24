@@ -1,0 +1,49 @@
+{% extends 'volunteer/base.html' %}
+{% load static %}
+{% block title %}Đăng nhập | Hội Tình Nguyện IUH{% endblock %}
+{% block content %}
+<div
+  class="container"
+  style="max-width: 400px; margin-top: 40px; margin-bottom: 24px"
+>
+  <div class="card shadow-sm">
+    <div
+      class="card-header bg-navy text-gold text-center"
+      style="padding: 10px 0"
+    >
+      <h3 style="font-size: 1.3rem; margin-bottom: 0">Đăng Nhập</h3>
+    </div>
+    <div class="card-body p-3" style="padding: 18px 18px 10px 18px !important">
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %} {% if form.errors %}
+        <div class="alert alert-danger">
+          {% for field in form %} {% for error in field.errors %}
+          <p>{{ field.label }}: {{ error }}</p>
+          {% endfor %} {% endfor %} {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="mb-3">
+          <label for="id_username" class="form-label">Tên đăng nhập</label>
+          {{ form.username }}
+        </div>
+        <div class="mb-3">
+          <label for="id_password" class="form-label">Mật khẩu</label>
+          {{ form.password }}
+        </div>
+        <button type="submit" class="btn btn-gold w-100 py-2 mt-1 login-btn">
+          Đăng nhập
+        </button>
+      </form>
+      <div class="mt-2 text-center">
+        Chưa có tài khoản? <a href="{% url 'signup' %}">Đăng ký</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteer/css/login.css' %}" />
+{% endblock %} {% block extra_js %}
+<script src="{% static 'volunteer/js/login.js' %}"></script>
+{% endblock %}

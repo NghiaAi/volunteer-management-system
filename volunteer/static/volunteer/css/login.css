@@ -1,0 +1,49 @@
+/* Tùy chỉnh giao diện form */
+.card-body {
+  padding: 2rem; /* Tăng padding để form thoáng hơn */
+}
+
+.form-label {
+  display: block; /* Đảm bảo nhãn chiếm toàn bộ chiều rộng */
+  margin-bottom: 0.5rem; /* Khoảng cách giữa nhãn và ô nhập liệu */
+}
+
+.form-control {
+  border-radius: 10px; /* Bo góc ô nhập liệu */
+  border: 1px solid #d6d6d6; /* Viền mỏng màu xám nhạt */
+  background: #faf9f6; /* Màu nền nhạt */
+  padding: 10px 14px; /* Tăng padding để ô nhập liệu thoáng hơn */
+  font-size: 1.08rem; /* Tăng kích thước chữ trong ô nhập liệu */
+  width: 100%; /* Đảm bảo ô nhập liệu chiếm toàn bộ chiều rộng */
+  transition: border-color 0.3s, box-shadow 0.3s; /* Hiệu ứng mượt mà khi focus */
+}
+
+.form-control:focus {
+  border-color: #d4af37; /* Viền đổi màu vàng khi focus */
+  box-shadow: 0 0 0 3px #f3e7c1; /* Hiệu ứng bóng nhẹ khi focus */
+  outline: none; /* Xóa viền mặc định của trình duyệt */
+}
+
+.login-btn {
+  font-size: 1.1rem; /* Tăng kích thước chữ nút */
+  border-radius: 25px; /* Bo góc nút */
+  font-weight: bold; /* Chữ đậm */
+  transition: background 0.2s; /* Hiệu ứng mượt khi hover */
+}
+
+.login-btn:hover {
+  background: #bfa13a; /* Màu vàng đậm hơn khi hover */
+}
+
+.alert-danger {
+  border-radius: 8px; /* Bo góc thông báo lỗi */
+  font-size: 0.95rem; /* Kích thước chữ thông báo lỗi nhỏ hơn */
+}
+
+.text-center a {
+  text-decoration: none; /* Xóa gạch chân */
+}
+
+.text-center a:hover {
+  text-decoration: underline; /* Gạch chân khi hover */
+}

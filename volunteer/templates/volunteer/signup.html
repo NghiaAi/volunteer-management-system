@@ -1,0 +1,64 @@
+{% extends 'volunteer/base.html' %} {% block title %}Đăng ký tài khoản | Hội
+Tình Nguyện IUH{% endblock %} {% block content %}
+<div
+  class="container"
+  style="max-width: 420px"
+>
+  <div class="card shadow-sm">
+    <div
+      class="card-header bg-navy text-gold text-center"
+      style="padding: 10px 0"
+    >
+      <h3 style="font-size: 1.3rem; margin-bottom: 0">Đăng Ký Tài Khoản</h3>
+    </div>
+    <div class="card-body p-3" style="padding: 18px 18px 10px 18px !important">
+      <form method="post" action="{% url 'signup' %}">
+        {% csrf_token %} {% if form.errors %}
+        <div class="alert alert-danger">
+          {% for field in form %} {% for error in field.errors %}
+          <p>{{ field.label }}: {{ error }}</p>
+          {% endfor %} {% endfor %} {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="mb-2">
+          <label for="id_username" class="form-label">Tên đăng nhập</label>
+          {{ form.username }}
+        </div>
+        <div class="mb-2">
+          <label for="id_email" class="form-label">Email</label>
+          {{ form.email }}
+        </div>
+        <div class="mb-2">
+          <label for="id_first_name" class="form-label">Họ</label>
+          {{ form.first_name }}
+        </div>
+        <div class="mb-2">
+          <label for="id_last_name" class="form-label">Tên</label>
+          {{ form.last_name }}
+        </div>
+        <div class="mb-2">
+          <label for="id_phone_number" class="form-label">Số điện thoại</label>
+          {{ form.phone_number }}
+        </div>
+        <div class="mb-2">
+          <label for="id_password1" class="form-label">Mật khẩu</label>
+          {{ form.password1 }}
+        </div>
+        <div class="mb-2">
+          <label for="id_password2" class="form-label">Xác nhận mật khẩu</label>
+          {{ form.password2 }}
+        </div>
+        <button type="submit" class="btn btn-gold w-100 py-2 mt-1">
+          Đăng ký
+        </button>
+      </form>
+      <div class="mt-2 text-center">
+        <span>Đã có tài khoản?</span>
+        <a href="{% url 'login' %}" class="ms-1">Đăng nhập</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

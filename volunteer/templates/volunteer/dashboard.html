@@ -1,0 +1,245 @@
+{% extends 'volunteer/base.html' %} {% load static %} {% block title %}Hoạt động
+| Hội Tình Nguyện IUH{% endblock %} {% block content %}
+<!-- Truyền CSRF token qua meta tag -->
+<meta name="csrf-token" content="{{ csrf_token }}" />
+
+<div class="container my-5">
+  <h2 class="section-title">Hoạt Động Tình Nguyện Của Bạn</h2>
+  <form method="get" class="event-filter-form mb-4">
+    <div class="d-flex flex-row align-items-start justify-content-center">
+      <div class="d-flex flex-column">
+        <label for="id_category" class="form-label mb-2 text-start"
+          >Loại sự kiện</label
+        >
+        {{ search_form.category }}
+      </div>
+      <div class="d-flex flex-column">
+        <label for="id_status" class="form-label mb-2 text-start"
+          >Trạng thái</label
+        >
+        {{ search_form.status }}
+      </div>
+      <button
+        type="submit"
+        class="btn btn-gold px-4 fw-bold align-self-end h-44px"
+      >
+        Lọc
+      </button>
+      {% if user.is_superuser %}
+      <a
+        href="{% url 'event_create' %}"
+        class="btn btn-gold px-4 d-flex align-items-center justify-content-center align-self-end h-44px"
+        title="Thêm sự kiện mới"
+      >
+        <i class="bi bi-plus-lg"></i>
+      </a>
+      {% endif %}
+      <a
+        href="{% url 'dashboard' %}"
+        class="btn btn-gold px-4 d-flex align-items-center justify-content-center align-self-end h-44px"
+        title="Làm mới"
+      >
+        <i class="bi bi-arrow-clockwise"></i>
+      </a>
+      <div class="search-container">
+        <div
+          class="search-bar d-flex align-items-center bg-white rounded-pill shadow-sm px-3 w-100"
+        >
+          {{ search_form.query }}
+          <button class="btn btn-link text-dark ms-2 fs-20px" type="submit">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a
+        class="nav-link {% if request.GET.tab|default:'all' == 'all' %}active{% endif %}"
+        href="?tab=all{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+        >Tất Cả</a
+      >
+    </li>
+    {% if user.is_authenticated %}
+    <li class="nav-item">
+      <a
+        class="nav-link {% if request.GET.tab == 'not_joined' %}active{% endif %}"
+        href="?tab=not_joined{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+        >Chưa Tham Gia</a
+      >
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link {% if request.GET.tab == 'joined' %}active{% endif %}"
+        href="?tab=joined{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+        >Đã Tham Gia</a
+      >
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link {% if request.GET.tab == 'liked' %}active{% endif %}"
+        href="?tab=liked{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+        >Đã Yêu Thích</a
+      >
+    </li>
+
+    {% endif %}
+  </ul>
+  <div class="row g-4">
+    {% for event in events %}
+    <div class="col-md-4">
+      <div class="card h-100">
+        <img
+          src="{% if event.cover_image %}{{ event.cover_image.url }}{% else %}{% static 'volunteer/default_event.jpg' %}{% endif %}"
+          class="event-cover card-img-top"
+          alt="{{ event.name }}"
+        />
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title fw-bold">{{ event.name }}</h5>
+          <div class="d-flex flex-wrap text-muted small mb-2 gap-3">
+            <span>
+              <i class="bi bi-calendar"></i>
+              {{ event.start_time|date:'d/m/Y'|default:"Chưa có thời gian" }}
+            </span>
+            <span>
+              <i class="bi bi-people"></i>
+              {{ event.participants.count }} / {{ event.max_participants|default:"Không giới hạn" }}
+            </span>
+            <span><i class="bi bi-geo-alt"></i> {{ event.location }}</span>
+          </div>
+          <p class="card-text small mb-2">
+            {{ event.description|truncatechars:120 }}
+          </p>
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <span
+              class="text-danger like-btn {% if user.is_authenticated and user in event.likes.all %}liked{% endif %}"
+              data-event-id="{{ event.pk }}"
+              data-like-url="{% url 'like_event' event.pk %}"
+            >
+              <i class="bi bi-heart"></i>
+              <span class="like-count">{{ event.like_count }}</span>
+            </span>
+            <span
+              class="text-primary share-btn"
+              data-event-id="{{ event.pk }}"
+              data-share-url="{% url 'share_event' event.pk %}"
+              data-bs-toggle="modal"
+              data-bs-target="#shareModal"
+            >
+              <i class="bi bi-share"></i>
+              <span class="share-count">{{ event.shares }}</span>
+            </span>
+          </div>
+          <div class="mt-auto text-end">
+            {% if user.is_superuser %}
+            <a
+              href="{% url 'event_update' event.pk %}"
+              class="btn btn-outline-danger fw-bold px-4 rounded-pill me-2"
+            >
+              Sửa/Xóa
+            </a>
+            <a
+              href="{% url 'event_report' event.pk %}"
+              class="btn btn-warning text-white fw-bold px-4 rounded-pill"
+              >Báo Cáo</a
+            >
+            {% endif %}
+            <a
+              href="{% url 'event_detail' event.pk %}"
+              class="btn btn-warning text-white fw-bold px-4 rounded-pill"
+              >Chi Tiết</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center text-muted">Không có sự kiện nào.</div>
+    {% endfor %}
+  </div>
+  <div class="mt-4 d-flex justify-content-center">
+    {% if is_paginated %}
+    <nav>
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="?page={{ page_obj.previous_page_number }}{% if request.GET.tab %}&tab={{ request.GET.tab }}{% endif %}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+            >«</a
+          >
+        </li>
+        {% endif %} {% for num in paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a
+            class="page-link"
+            href="?page={{ num }}{% if request.GET.tab %}&tab={{ request.GET.tab }}{% endif %}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+            >{{ num }}</a
+          >
+        </li>
+        {% endfor %} {% if page_obj.has_next %}
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="?page={{ page_obj.next_page_number }}{% if request.GET.tab %}&tab={{ request.GET.tab }}{% endif %}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+            >»</a
+          >
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal để hiển thị liên kết chia sẻ -->
+<div
+  class="modal fade"
+  id="shareModal"
+  tabindex="-1"
+  aria-labelledby="shareModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shareModalLabel">Chia sẻ sự kiện</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>Liên kết đến sự kiện:</p>
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control share-link-input"
+            id="shareLink"
+            readonly
+          />
+          <button class="btn btn-primary" type="button" id="copyLinkButton">
+            Sao chép
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteer/css/dashboard.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'volunteer/js/dashboard.js' %}"></script>
+{% endblock %}

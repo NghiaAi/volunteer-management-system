@@ -1,0 +1,43 @@
+{% extends 'volunteer/base.html' %}
+{% load static %}
+{% block title %}Quyên Góp| Hội Tình Nguyện IUH{% endblock %}
+{% block content %}
+<div class="container my-5 text-center">
+  <h2 class="text-gold mb-3">Quyên Góp Duy Trì Hoạt Động Tình Nguyện</h2>
+  <p>
+    Hãy đóng góp để giúp chúng tôi duy trì các hoạt động tình nguyện và mang lại
+    nhiều lợi ích cho cộng đồng.
+  </p>
+  <div class="d-flex justify-content-center my-4">
+    <img
+      src="{% static 'volunteer/image/qr.jpg' %}"
+      alt="QR Donate"
+      class="qr-image"
+    />
+  </div>
+  <div class="mb-3">
+    Quét mã QR để quyên góp<br />
+    Hoặc chuyển khoản qua số tài khoản: <b>1234 5678 9012 3456</b><br />
+    Tên chủ tài khoản: <b>Hội Tình Nguyện IUH</b><br />
+    Ngân hàng: <b>Ngân hàng TMCP Ngoại Thương Việt Nam (Vietcombank)</b>
+  </div>
+  <div class="progress my-4">
+    <div
+      class="progress-bar bg-gold"
+      role="progressbar"
+      style="width: 0%"
+      aria-valuenow="0"
+      aria-valuemin="0"
+      aria-valuemax="500000000"
+    ></div>
+  </div>
+  <div>
+    <b>Số tiền đã quyên góp: 0 VND</b><br />
+    <b>Mục tiêu: 500,000,000 VND</b>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteer/css/donate.css' %}">
+{% endblock %}
