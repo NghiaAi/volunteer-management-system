@@ -62,6 +62,96 @@ class HomeView(ListView):
         context['form'] = CustomUserCreationForm()
         return context
 
+class EventDetailView(DetailView):
+    """Detail view for a specific event"""
+    model = Event
+    template_name = 'volunteer/event_detail.html'
+    context_object_name = 'event'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            context['is_participating'] = EventParticipation.objects.filter(
+                user=self.request.user, 
+                event=self.object
+            ).exists()
+            context['has_liked'] = self.object.likes.filter(
+                id=self.request.user.id
+            ).exists()
+        if self.object.status == 'COM' and self.request.user.is_authenticated:
+            if self.request.user == self.object.organizer or self.request.user.is_admin:
+                try:
+                    report = self.object.report
+                    context['event_report'] = report
+                except EventReport.DoesNotExist:
+                    context['report_form'] = EventReportForm()
+        return context
+    
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.user.is_authenticated:
+            self.object.viewers.add(request.user)
+        context = self.get_context_data()
+        # Trả về JSON nếu là yêu cầu AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'participant_count': self.object.participant_count(),
+                'view_count': self.object.viewers.count()
+            })
+        return self.render_to_response(context)
+
+@login_required
+def join_event(request, pk):
+    """View for joining an event"""
+    event = get_object_or_404(Event, pk=pk)
+    if EventParticipation.objects.filter(user=request.user, event=event).exists():
+        return JsonResponse({'error': 'Bạn đã đăng ký tham gia sự kiện này rồi.'})
+    if event.participants.count() >= event.max_participants and event.max_participants > 0:
+        return JsonResponse({'error': 'Sự kiện đã đủ người tham gia.'})
+    EventParticipation.objects.create(user=request.user, event=event)
+    return JsonResponse({
+        'success': 'Đăng ký tham gia sự kiện thành công!',
+        'participant_count': event.participant_count()
+    })
+
+@login_required
+def leave_event(request, pk):
+    """View for leaving an event"""
+    event = get_object_or_404(Event, pk=pk)
+    participation = EventParticipation.objects.filter(user=request.user, event=event).first()
+    if not participation:
+        return JsonResponse({'error': 'Bạn chưa đăng ký tham gia sự kiện này.'})
+    participation.delete()
+    return JsonResponse({
+        'success': 'Đã hủy đăng ký tham gia sự kiện.',
+        'participant_count': event.participant_count()
+    })
+
+@login_required
+def like_event(request, pk):
+    """View for liking/unliking an event"""
+    event = get_object_or_404(Event, pk=pk)
+    if event.likes.filter(id=request.user.id).exists():
+        event.likes.remove(request.user)
+        liked = False
+    else:
+        event.likes.add(request.user)
+        liked = True
+    return JsonResponse({
+        'liked': liked,
+        'like_count': event.likes.count()
+    })
+
+@login_required
+def share_event(request, pk):
+    """View for tracking event shares"""
+    event = get_object_or_404(Event, pk=pk)
+    event.shares += 1
+    event.save()
+    return JsonResponse({
+        'shares': event.shares
+    })
+
 
 class SignUpView(CreateView):
     """View for user registration"""

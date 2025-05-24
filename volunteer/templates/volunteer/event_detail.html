@@ -1,0 +1,329 @@
+{% extends 'volunteer/base.html' %}
+{% load static %}
+{% block title %}{{ event.name }} | Hội Tình Nguyện IUH{% endblock %}
+{% block content %}
+<!-- Truyền CSRF token qua meta tag -->
+<meta name="csrf-token" content="{{ csrf_token }}" />
+
+<div class="container my-5">
+  <div class="row">
+    <div class="col-lg-9">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h1 class="fw-bold mb-3" style="font-size: 2.5rem">
+            {{ event.name }}
+          </h1>
+          {% if event.cover_image %}
+            <img
+              src="{{ event.cover_image.url }}"
+              class="w-100 rounded mb-3"
+              style="max-height: 350px; object-fit: cover"
+            />
+          {% else %}
+            <img
+              src="{% static 'volunteer/default_event.jpg' %}"
+              class="w-100 rounded mb-3"
+              style="max-height: 350px; object-fit: cover"
+            />
+          {% endif %}
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div>
+                <i class="bi bi-calendar-event"></i> <b>Ngày tổ chức:</b>
+                {% if event.start_time %} {{ event.start_time|date:'d/m/Y' }} {% else %} Chưa có thông tin {% endif %}
+              </div>
+              <div>
+                <i class="bi bi-calendar-check"></i> <b>Ngày kết thúc:</b>
+                {% if event.end_time %} {{ event.end_time|date:'d/m/Y' }} {% else %} Chưa có thông tin {% endif %}
+              </div>
+              <div>
+                <i class="bi bi-clock"></i> <b>Số giờ tình nguyện:</b>
+                {{ event.volunteer_hours|default:'-' }} giờ
+              </div>
+              <div>
+                <i class="bi bi-geo-alt"></i> <b>Địa điểm:</b>
+                {% if event.location %} {{ event.location }} {% else %} Chưa có thông tin {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div>
+                <i class="bi bi-clipboard-check"></i> <b>Trạng thái:</b>
+                {% if event.status %} {{ event.get_status_display }} {% else %} Chưa có thông tin {% endif %}
+              </div>
+              <div>
+                <i class="bi bi-tag"></i> <b>Loại sự kiện:</b>
+                {% if event.category %} {{ event.get_category_display }} {% else %} Chưa có thông tin {% endif %}
+              </div>
+              <div>
+                <i class="bi bi-people"></i> <b>Số người tham gia:</b>
+                <span id="participant-count">{{ event.participant_count }}</span>
+                / {% if event.max_participants %} {{ event.max_participants }} {% else %} Không giới hạn {% endif %}
+              </div>
+              <div>
+                <i class="bi bi-telephone"></i> <b>Thắc mắc liên hệ:</b>
+                {{ event.contact_info|default:'-' }}
+              </div>
+            </div>
+          </div>
+          <h3 class="mt-4 mb-2">Mô tả sự kiện</h3>
+          <div class="mb-3">{{ event.description|linebreaks }}</div>
+          {% if event.detail_image %}
+            <div class="text-center mb-2">
+              <img
+                src="{{ event.detail_image.url }}"
+                class="img-fluid rounded"
+                style="max-height: 350px"
+              />
+              <div class="fst-italic mt-2 text-muted" style="font-size: 1rem">
+                {{ event.detail_image_caption }}
+              </div>
+            </div>
+            
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex gap-2 mb-2 flex-wrap">
+            <a href="{% url 'dashboard' %}" class="btn btn-light border">
+              <i class="bi bi-arrow-left"></i> Trở về
+            </a>
+            <button
+              class="btn btn-light border like-btn {% if has_liked %}liked{% endif %}"
+              id="like-btn"
+              data-like-url="{% url 'like_event' event.pk %}"
+            >
+              <i class="bi bi-heart{% if has_liked %}-fill{% endif %}"></i> Yêu thích
+            </button>
+            <button
+              class="btn btn-light border share-btn"
+              id="share-btn"
+              data-share-url="{% url 'share_event' event.pk %}"
+              data-event-pk="{{ event.pk }}"
+            >
+              <i class="bi bi-share"></i> Chia sẻ
+            </button>
+            <!-- Nút Đăng ký/Rời khỏi -->
+            {% if user.is_authenticated %}
+              {% if event.status == 'ONG' %}
+                {% if is_participating %}
+                  <button
+                    class="btn btn-danger"
+                    id="leave-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmLeaveModal"
+                    data-leave-url="{% url 'leave_event' event.pk %}"
+                  >
+                    <i class="bi bi-x-circle"></i> Rời khỏi
+                  </button>
+                {% else %}
+                  <button
+                    class="btn btn-success"
+                    id="join-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmJoinModal"
+                    data-join-url="{% url 'join_event' event.pk %}"
+                  >
+                    <i class="bi bi-check-circle"></i> Đăng ký
+                  </button>
+                {% endif %}
+              {% else %}
+                <button class="btn btn-secondary" disabled>
+                  <i class="bi bi-lock"></i> Hoạt động không còn mở đăng ký
+                </button>
+              {% endif %}
+            {% else %}
+              <a href="{% url 'login' %}" class="btn btn-warning">
+                <i class="bi bi-person"></i> Đăng nhập để tham gia
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <div class="card-header bg-white fw-bold">Thống kê</div>
+        <div class="card-body">
+          <div>
+            <i class="bi bi-heart-fill text-danger"></i> Lượt yêu thích:
+            <span id="like-count">{{ event.like_count }}</span>
+          </div>
+          <div>
+            <i class="bi bi-share-fill text-success"></i> Lượt chia sẻ:
+            <span id="share-count">{{ event.shares }}</span>
+          </div>
+          <div>
+            <i class="bi bi-eye-fill text-primary"></i> Lượt xem:
+            <span id="view-count">{{ event.view_count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal xác nhận đăng ký -->
+<div
+  class="modal fade"
+  id="confirmJoinModal"
+  tabindex="-1"
+  aria-labelledby="confirmJoinModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmJoinModalLabel">Xác nhận đăng ký</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        Bạn có chắc chắn muốn đăng ký hoạt động này không?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Hủy
+        </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          id="confirm-join"
+          data-join-url="{% url 'join_event' event.pk %}"
+        >
+          Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal xác nhận hủy đăng ký -->
+<div
+  class="modal fade"
+  id="confirmLeaveModal"
+  tabindex="-1"
+  aria-labelledby="confirmLeaveModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmLeaveModalLabel">Xác nhận hủy đăng ký</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        Bạn có chắc chắn muốn hủy đăng ký hoạt động này không?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Hủy
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          id="confirm-leave"
+          data-leave-url="{% url 'leave_event' event.pk %}"
+        >
+          Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal thông báo kết quả -->
+<div
+  class="modal fade"
+  id="resultModal"
+  tabindex="-1"
+  aria-labelledby="resultModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="resultModalLabel">Thông báo</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body" id="result-message">
+        <!-- Nội dung thông báo sẽ được thêm bằng JavaScript -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal để hiển thị liên kết chia sẻ -->
+<div
+  class="modal fade"
+  id="shareModal"
+  tabindex="-1"
+  aria-labelledby="shareModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shareModalLabel">Chia sẻ sự kiện</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>Liên kết đến sự kiện:</p>
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control share-link-input"
+            id="shareLink"
+            readonly
+          />
+          <button class="btn btn-primary" type="button" id="copyLinkButton">
+            Sao chép
+          </button>
+        </div>
+        <span id="copySuccessMessage" class="text-success mt-2 d-none">Đã sao chép thành công!</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteer/css/event_detail.css' %}" />
+{% endblock %}
+
+{% block extra_js %}
+<script
+  id="event-detail-script"
+  src="{% static 'volunteer/js/event_detail.js' %}"
+  data-event-detail-url="{% url 'event_detail' event.pk %}"
+></script>
+{% endblock %}

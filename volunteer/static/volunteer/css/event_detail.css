@@ -1,0 +1,22 @@
+.share-link-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.like-btn.liked i {
+  color: #ff0000; /* Màu đỏ khi đã thích */
+}
+
+#result-message {
+  padding-left: 15px; /* Dịch sang phải 15px */
+}
+
+#result-message.text-success {
+  color: #28a745;
+}
+
+#result-message.text-danger {
+  color: #dc3545;
+}

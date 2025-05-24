@@ -13,7 +13,7 @@ urlpatterns = [
     
     # Other paths remain unchanged
     path('profile/', views.ProfileView.as_view(), name='profile'),
-
+    path('profile/update/', views.ProfileUpdateView.as_view(), name='profile_update'),
     path('donate/', views.donate, name='donate'),
 
     path('events/<int:pk>/', views.EventDetailView.as_view(), name='event_detail'),
