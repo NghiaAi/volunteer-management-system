@@ -212,7 +212,33 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, "Tạo sự kiện mới thành công!")
         return super().form_valid(form)
 
+class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """View for updating events"""
+    model = Event
+    form_class = EventForm
+    template_name = 'volunteer/event_form.html'
+    
+    def test_func(self):
+        event = self.get_object()
+        return self.request.user == event.organizer or self.request.user.is_admin
+    
+    def form_valid(self, form):
+        messages.success(self.request, "Cập nhật sự kiện thành công!")
+        return super().form_valid(form)
 
+class EventDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """View for deleting events"""
+    model = Event
+    template_name = 'volunteer/event_confirm_delete.html'
+    success_url = reverse_lazy('home')
+    
+    def test_func(self):
+        event = self.get_object()
+        return self.request.user == event.organizer or self.request.user.is_admin
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Xóa sự kiện thành công!")
+        return super().delete(request, *args, **kwargs)
 
 @login_required
 def create_event_report(request, pk):
@@ -413,3 +439,95 @@ class EventReportView(UserPassesTestMixin, DetailView):
             context['report_exists'] = True
         return self.render_to_response(context)
 
+class StatisticsView(UserPassesTestMixin, TemplateView):
+    template_name = 'volunteer/statistics.html'
+
+    def test_func(self):
+        return self.request.user.is_admin  # Chỉ admin mới truy cập được
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Determine the application's root directory (volunteer_project/volunteer/)
+        # settings.BASE_DIR usually points to volunteer_project/
+        # So, app_static_dir points to volunteer_project/volunteer/static/
+        app_static_dir = os.path.join(settings.BASE_DIR, 'volunteer', 'static')
+        
+        # Define the target directory for charts
+        # This will be volunteer_project/volunteer/static/volunteer/image/
+        chart_dir = os.path.join(app_static_dir, 'volunteer', 'image')
+        
+        os.makedirs(chart_dir, exist_ok=True)
+
+        # Định nghĩa ánh xạ trạng thái với tên hiển thị
+        status_display_map = dict(Event.EventStatus.choices)
+
+        # 1. Biểu đồ phân loại sự kiện theo trạng thái
+        status_counts = Event.objects.values('status').annotate(count=Count('id'))
+        statuses = [str(status_display_map[status['status']]) for status in status_counts]
+        counts = [status['count'] for status in status_counts]
+
+        # Sử dụng seaborn để làm đẹp biểu đồ
+        sns.set_style("whitegrid")
+        plt.figure(figsize=(8, 5))  # Giảm chiều cao để đồng bộ kích thước
+        bars = plt.bar(statuses, counts, color=sns.color_palette("Blues", len(statuses)), edgecolor='black', linewidth=1.2)
+
+        # Tùy chỉnh giao diện
+        plt.title('Phân loại sự kiện theo trạng thái', fontsize=16, pad=20, fontweight='bold', color='#333333')
+        plt.xlabel('Trạng thái', fontsize=14, labelpad=10, color='#333333')
+        plt.ylabel('Số lượng sự kiện', fontsize=14, labelpad=10, color='#333333')
+        plt.xticks(fontsize=12, color='#333333')
+        plt.yticks(fontsize=12, color='#333333')
+        plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+        # Tùy chỉnh lưới
+        plt.grid(True, which='major', axis='y', linestyle='--', alpha=0.7)
+        plt.tight_layout()
+
+        # Lưu biểu đồ dưới dạng hình ảnh
+        status_chart_path = os.path.join(chart_dir, 'status_chart.png')
+        plt.savefig(status_chart_path, bbox_inches='tight', dpi=100)
+        plt.close()
+
+        # 2. Biểu đồ số lượng sự kiện theo tháng (năm hiện tại)
+        current_year = datetime.now().year
+        events_by_month = (Event.objects
+                          .filter(start_time__year=current_year)
+                          .annotate(month=ExtractMonth('start_time'))
+                          .values('month')
+                          .annotate(count=Count('id'))
+                          .order_by('month'))
+        
+        months = range(1, 13)
+        event_counts = [0] * 12
+        for entry in events_by_month:
+            month = entry['month'] - 1  # Chỉ số bắt đầu từ 0
+            event_counts[month] = entry['count']
+
+        # Sử dụng seaborn để làm đẹp biểu đồ
+        sns.set_style("whitegrid")
+        plt.figure(figsize=(8, 5))  # Giảm chiều cao để đồng bộ kích thước
+        plt.plot(months, event_counts, marker='o', color='#007bff', linewidth=2.5, markersize=8, label='Số lượng sự kiện')
+
+        # Tùy chỉnh giao diện
+        plt.title(f'Số lượng sự kiện theo tháng (Năm {current_year})', fontsize=16, pad=20, fontweight='bold', color='#333333')
+        plt.xlabel('Tháng', fontsize=14, labelpad=10, color='#333333')
+        plt.ylabel('Số lượng sự kiện', fontsize=14, labelpad=10, color='#333333')
+        plt.xticks(months, ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], fontsize=12, color='#333333')
+        plt.yticks(fontsize=12, color='#333333')
+        plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+
+
+        # Tùy chỉnh lưới
+        plt.grid(True, which='both', linestyle='--', alpha=0.7)
+        plt.legend(fontsize=12)
+        plt.tight_layout()
+
+        # Lưu biểu đồ dưới dạng hình ảnh
+        monthly_chart_path = os.path.join(chart_dir, 'monthly_chart.png')
+        plt.savefig(monthly_chart_path, bbox_inches='tight', dpi=100)
+        plt.close()
+
+        # Truyền đường dẫn hình ảnh vào context
+        context['status_chart_url'] = 'volunteer/image/status_chart.png'
+        context['monthly_chart_url'] = 'volunteer/image/monthly_chart.png'
+        return context

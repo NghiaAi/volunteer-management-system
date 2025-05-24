@@ -1,0 +1,23 @@
+
+  .chart-image {
+    max-width: 100%;
+    width: 100%; /* Đảm bảo hình ảnh chiếm toàn bộ chiều rộng của thẻ cha */
+    height: 400px; /* Giới hạn chiều cao cố định để đồng bộ */
+    object-fit: contain; /* Giữ tỷ lệ hình ảnh, không làm méo */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+  .chart-image:hover {
+    transform: scale(1.02);
+  }
+  .card-header {
+    font-size: 1.25rem;
+    color: #333333;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  h1 {
+    font-size: 2rem;
+    color: #302a2a;
+
+  }
