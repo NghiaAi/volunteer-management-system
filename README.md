@@ -178,7 +178,7 @@ volunteer_project/
 1.  **Clone dự án từ repository:**
 
     ```bash
-    git clone <URL-repository-cua-ban>
+    git clone https://github.com/NghiaAi/volunteer-management-system.git
     cd volunteer_project
     ```
 
