@@ -45,7 +45,7 @@ class CustomUserChangeForm(UserChangeForm):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'first_name', 'last_name', 'age', 'phone_number', 'address', 'skills', 'volunteer_hours', 'old_password', 'password1', 'password2']
+        fields = ['username', 'email', 'first_name', 'last_name', 'age', 'phone_number', 'address', 'skills', 'old_password', 'password1', 'password2']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -58,7 +58,6 @@ class CustomUserChangeForm(UserChangeForm):
         self.fields['phone_number'].widget.attrs.update({'placeholder': 'Nhập số điện thoại', 'class': 'form-control'})
         self.fields['address'].widget.attrs.update({'placeholder': 'Nhập địa chỉ', 'class': 'form-control'})
         self.fields['skills'].widget.attrs.update({'placeholder': 'Nhập kỹ năng', 'class': 'form-control'})
-        self.fields['volunteer_hours'].widget.attrs.update({'placeholder': 'Nhập số giờ tình nguyện', 'class': 'form-control'})
         self.fields['old_password'].widget.attrs.update({'placeholder': 'Nhập mật khẩu cũ', 'class': 'form-control'})
         self.fields['password1'].widget.attrs.update({'placeholder': 'Nhập mật khẩu mới', 'class': 'form-control'})
         self.fields['password2'].widget.attrs.update({'placeholder': 'Xác nhận mật khẩu mới', 'class': 'form-control'})
