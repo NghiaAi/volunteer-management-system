@@ -60,19 +60,6 @@ Tôi đã tạo 2 file Excel chi tiết để quản lý dự án theo phương 
 
 - Hệ thống like và favorite
 - Chia sẻ sự kiện
-- Tương tác xã hội
-
-### Sprint 6 (Tuần 11-12): UX Improvements 📋
-
-- Email notifications
-- Mobile responsive design
-- Performance optimization
-
-### Sprint 7 (Tuần 13-14): API & Deployment 📋
-
-- REST API development
-- Testing và deployment
-- Production optimization
 
 ## Tính Năng Chính Của Files
 
@@ -191,13 +178,6 @@ Các file Excel này có thể được customize theo nhu cầu cụ thể:
 
 ### Regeneration
 
-Để tạo lại files với data mới:
-
-```bash
-python create_scrum_excel.py
-python create_weekly_tasks_excel.py
-```
-
 ## Support & Maintenance
 
 ### Regular Updates
@@ -213,5 +193,3 @@ python create_weekly_tasks_excel.py
 - Historical data preservation
 
 ---
-
-**Lưu ý**: Các file này được thiết kế dựa trên dự án Django Volunteer Management System hiện có và có thể được điều chỉnh theo nhu cầu thực tế của team.
