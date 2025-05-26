@@ -97,11 +97,12 @@ class EventForm(forms.ModelForm):
     
     class Meta:
         model = Event
-        fields = ['name', 'category', 'start_time', 'end_time', 'location', 
+        fields = ['name', 'category', 'status', 'start_time', 'end_time', 'location', 
                  'description', 'volunteer_hours', 'max_participants', 'cover_image']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
             'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'description': forms.Textarea(attrs={'rows': 5}),

@@ -47,7 +47,7 @@ body, .container {
   text-decoration: underline; /* Gạch chân khi hover */
 }
 
-/* Tùy chỉnh badge */
+
 .badge {
   font-size: 0.85rem; /* Kích thước chữ badge */
   padding: 0.35rem 0.75rem; /* Tăng padding cho badge */
@@ -55,7 +55,7 @@ body, .container {
   border-radius: 12px; /* Bo góc badge */
 }
 
-/* Tùy chỉnh nút "Cập nhật hồ sơ" */
+
 .btn-outline-gold {
   color: #d4af37; /* Màu vàng */
   border-color: #d4af37; /* Viền vàng */
@@ -76,7 +76,7 @@ body, .container {
 }
 
 footer.bg-navy {
-  background: #23263a !important;
+  background: #186d54 !important;
   color: #fff;
 }
 
